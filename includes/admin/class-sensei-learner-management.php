@@ -690,6 +690,25 @@ class Sensei_Learner_Management {
 				$result = $manual_enrolment_provider->enrol_learner( $user_id, $course_id );
 			}
 
+			// Log event: when a learner is manually added to a course or lesson.
+			if ( $result ) {
+
+				if ( '0' === $lesson_id ) {
+					$complete_checkbox = isset( $_POST['add_complete_course'] ) && 'yes' === $_POST['add_complete_course'] ? 'true' : 'false';
+				} else {
+					$complete_checkbox = isset( $_POST['add_complete_lesson'] ) && 'yes' === $_POST['add_complete_lesson'] ? 'true' : 'false';
+				}
+
+				$event_properties = array(
+					'learner_count' => count( $user_ids ),
+					'course_id'     => '0' === $lesson_id ? $course_id : '',
+					'lesson_id'     => '0' === $lesson_id ? '' : $lesson_id,
+					'complete'      => $complete_checkbox,
+				);
+				sensei_log_event( 'learner_management_learner_add', $event_properties );
+
+			} // End log event.
+
 			switch ( $post_type ) {
 				case 'course':
 					// Complete each lesson if course is set to be completed.
